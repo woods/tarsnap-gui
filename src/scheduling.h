@@ -23,6 +23,9 @@ public slots:
     //! Disable launchd or cron jobs
     void disableJobScheduling();
 
+    //! Check and update (if necessary) the path to the Tarsnap-GUI binary
+    void ensureCorrectSchedulingPath();
+
 private:
     QWidget *parent;
 };

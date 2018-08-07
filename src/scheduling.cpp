@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QObject>
 #include <QProcess>
+#include <QSettings>
 #include <QString>
 
 #include "debug.h"
@@ -347,5 +348,35 @@ void Scheduling::disableJobScheduling()
         QMessageBox::critical(parent, tr("Job scheduling"), msg);
         return;
     }
+#endif
+}
+
+void Scheduling::ensureCorrectSchedulingPath()
+{
+#if defined(Q_OS_OSX)
+    QSettings launchdPlist(QDir::homePath()
+                               + "/Library/LaunchAgents/com.tarsnap.gui.plist",
+                           QSettings::NativeFormat);
+
+    // Bail if the file doesn't exist
+    if(!launchdPlist.contains("ProgramArguments"))
+        return;
+
+    // Get path, bail if it still exists (we assume it's still executable)
+    QStringList args =
+        launchdPlist.value("ProgramArguments").value<QStringList>();
+    if(QFile::exists(args.at(0)))
+        return;
+
+    // Update the path
+    args.replace(0, QCoreApplication::applicationFilePath().toLatin1());
+    launchdPlist.setValue("ProgramArguments", args);
+
+    // Inform the user
+    QMessageBox::information(
+        parent, tr("Updated launchd path"),
+        tr("The OS X launchd scheduling service contained an out-of-date link "
+           "to Tarsnap GUI (did you upgrade it recently?).\n\nThis has been "
+           "updated to point to the current Tarsnap GUI."));
 #endif
 }

@@ -441,6 +441,9 @@ MainWindow::MainWindow(QWidget *parent)
     consoleUI.setupUi(&_consoleWindow);
     _consoleLog = consoleUI.log;
     _ui.consoleButton->setPopup(&_consoleWindow);
+
+    // Make sure we have the path to the current Tarsnap-GUI binary
+    _scheduling.ensureCorrectSchedulingPath();
 }
 
 MainWindow::~MainWindow()
